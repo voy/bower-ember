@@ -5,7 +5,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   1.13.0-beta.1+canary.c762400b
+ * @version   1.13.0-beta.1+canary.57f05daa
  */
 
 (function() {
@@ -15970,10 +15970,14 @@ enifed('ember-htmlbars/tests/system/make_view_helper_test', ['ember-htmlbars/sys
     }
   });
 
-  QUnit.skip("makes helpful assertion when called with invalid arguments", function () {
+  QUnit.test("makes helpful assertion when called with invalid arguments", function () {
     var SomeRandom = EmberView['default'].extend({
       template: ember_template_compiler.compile("Some Random Class")
     });
+
+    SomeRandom.toString = function () {
+      return "Some Random Class";
+    };
 
     var helper = makeViewHelper['default'](SomeRandom);
     registry.register("helper:some-random", helper);
@@ -15986,6 +15990,25 @@ enifed('ember-htmlbars/tests/system/make_view_helper_test', ['ember-htmlbars/sys
     expectAssertion(function () {
       utils.runAppend(view);
     }, "You can only pass attributes (such as name=value) not bare values to a helper for a View found in 'Some Random Class'");
+  });
+
+  QUnit.test("can properly yield", function () {
+    var SomeRandom = EmberView['default'].extend({
+      layout: ember_template_compiler.compile("Some Random Class - {{yield}}")
+    });
+
+    var helper = makeViewHelper['default'](SomeRandom);
+    registry.register("helper:some-random", helper);
+
+    view = EmberView['default'].create({
+      template: ember_template_compiler.compile("{{#some-random}}Template{{/some-random}}"),
+      container: container
+    });
+
+    utils.runAppend(view);
+    debugger;
+
+    equal(view.$().text(), "Some Random Class - Template");
   });
 
 });
@@ -44322,7 +44345,7 @@ enifed('ember-template-compiler/tests/system/compile_test', ['ember-template-com
 
     var actual = compile['default'](templateString);
 
-    equal(actual.revision, "Ember@1.13.0-beta.1+canary.c762400b", "revision is included in generated template");
+    equal(actual.revision, "Ember@1.13.0-beta.1+canary.57f05daa", "revision is included in generated template");
   });
 
   QUnit.test("the template revision is different than the HTMLBars default revision", function () {
@@ -54771,7 +54794,7 @@ enifed('ember/tests/helpers/helper_registration_test', ['ember', 'ember-htmlbars
     ok(!helpers["x-reverse"], "Container-registered helper doesn't wind up on global helpers hash");
   });
 
-  QUnit.skip("Bound `makeViewHelper` helpers registered on the container can be used", function () {
+  QUnit.test("Bound `makeViewHelper` helpers registered on the container can be used", function () {
     Ember.TEMPLATES.application = compile("<div id='wrapper'>{{x-foo}} {{x-foo name=foo}}</div>");
 
     boot(function () {
@@ -54780,7 +54803,7 @@ enifed('ember/tests/helpers/helper_registration_test', ['ember', 'ember-htmlbars
       }));
 
       registry.register("helper:x-foo", makeViewHelper(Ember.Component.extend({
-        layout: compile("woot!!{{name}}")
+        layout: compile("woot!!{{attrs.name}}")
       })));
     });
 

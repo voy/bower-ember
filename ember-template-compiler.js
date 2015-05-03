@@ -5,7 +5,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   1.13.0-beta.1+canary.c762400b
+ * @version   1.13.0-beta.1+canary.57f05daa
  */
 
 (function() {
@@ -2632,7 +2632,7 @@ enifed('ember-metal/core', ['exports'], function (exports) {
 
     @class Ember
     @static
-    @version 1.13.0-beta.1+canary.c762400b
+    @version 1.13.0-beta.1+canary.57f05daa
   */
 
   if ('undefined' === typeof Ember) {
@@ -2661,10 +2661,10 @@ enifed('ember-metal/core', ['exports'], function (exports) {
   /**
     @property VERSION
     @type String
-    @default '1.13.0-beta.1+canary.c762400b'
+    @default '1.13.0-beta.1+canary.57f05daa'
     @static
   */
-  Ember.VERSION = '1.13.0-beta.1+canary.c762400b';
+  Ember.VERSION = '1.13.0-beta.1+canary.57f05daa';
 
   /**
     Standard environmental variables. You can define these in a global `EmberENV`
@@ -10321,7 +10321,7 @@ enifed('ember-template-compiler/system/compile_options', ['exports', 'ember-meta
       options = {};
     }
 
-    options.revision = "Ember@1.13.0-beta.1+canary.c762400b";
+    options.revision = "Ember@1.13.0-beta.1+canary.57f05daa";
     options.disableComponentGeneration = disableComponentGeneration;
     options.plugins = plugins['default'];
 
@@ -11223,7 +11223,7 @@ enifed('htmlbars-compiler/template-compiler', ['exports', './fragment-opcode-com
 
   function TemplateCompiler(options) {
     this.options = options || {};
-    this.revision = this.options.revision || 'HTMLBars@v0.13.11';
+    this.revision = this.options.revision || 'HTMLBars@v0.13.12';
     this.fragmentOpcodeCompiler = new FragmentOpcodeCompiler['default']();
     this.fragmentCompiler = new FragmentJavaScriptCompiler['default']();
     this.hydrationOpcodeCompiler = new HydrationOpcodeCompiler['default']();
@@ -12045,6 +12045,7 @@ enifed('htmlbars-runtime/hooks', ['exports', './render', '../morph-range/morph-l
       yield: yieldArgs,
       yieldItem: yieldItem(template, env, scope, morph, renderState, visitor),
       yieldIn: yieldInShadowTemplate(template, env, scope, morph, renderState, visitor),
+      raw: template,
 
       render: function (self, blockArguments) {
         yieldArgs(blockArguments, self);
@@ -12255,7 +12256,7 @@ enifed('htmlbars-runtime/hooks', ['exports', './render', '../morph-range/morph-l
   function continueBlock(morph, env, scope, path, params, hash, template, inverse, visitor) {
     hostBlock(morph, env, scope, template, inverse, null, visitor, function (options) {
       var helper = env.hooks.lookupHelper(env, scope, path);
-      env.hooks.invokeHelper(morph, env, scope, visitor, params, hash, helper, options.templates, thisFor(options.templates));
+      return env.hooks.invokeHelper(morph, env, scope, visitor, params, hash, helper, options.templates, thisFor(options.templates));
     });
   }
 
@@ -12764,7 +12765,7 @@ enifed('htmlbars-runtime/render', ['exports', '../htmlbars-util/array-utils', '.
 
     var template = {
       isHTMLBars: true,
-      revision: "HTMLBars@1.13.0-beta.1+canary.c762400b",
+      revision: "HTMLBars@1.13.0-beta.1+canary.57f05daa",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -15952,7 +15953,11 @@ enifed('htmlbars-util/template-utils', ['exports', '../htmlbars-util/morph-utils
 
   function renderAndCleanup(morph, env, options, shadowOptions, callback) {
     options.renderState.shadowOptions = shadowOptions;
-    callback(options);
+    var result = callback(options);
+
+    if (result && result.handled) {
+      return;
+    }
 
     var item = options.renderState.morphListStart;
     var toClear = options.renderState.clearMorph;
