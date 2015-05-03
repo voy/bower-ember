@@ -5,7 +5,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   1.13.0-beta.1+canary.73881e41
+ * @version   1.13.0-beta.1+canary.4189eb0f
  */
 
 (function() {
@@ -27078,13 +27078,12 @@ enifed('ember-routing-htmlbars/tests/helpers/render_test', ['ember-metal/core', 
     equal(parentTriggered, 1, "The event bubbled to the parent");
   });
 
-  QUnit.skip("{{render}} helper should be able to render a template again when it was removed", function () {
+  QUnit.test("{{render}} helper should be able to render a template again when it was removed", function () {
     var controller = EmberController['default'].extend({ container: container });
     var CoreOutlet = container.lookupFactory("view:core-outlet");
     view = CoreOutlet.create({
       container: container
     });
-    tests__utils.runAppend(view);
 
     Ember['default'].TEMPLATES["home"] = compile['default']("<p>BYE</p>");
 
@@ -27104,6 +27103,7 @@ enifed('ember-routing-htmlbars/tests/helpers/render_test', ['ember-metal/core', 
       };
       view.setOutletState(liveRoutes);
     });
+    tests__utils.runAppend(view);
 
     equal(view.$().text(), "HI1BYE");
 
@@ -44344,7 +44344,7 @@ enifed('ember-template-compiler/tests/system/compile_test', ['ember-template-com
 
     var actual = compile['default'](templateString);
 
-    equal(actual.revision, "Ember@1.13.0-beta.1+canary.73881e41", "revision is included in generated template");
+    equal(actual.revision, "Ember@1.13.0-beta.1+canary.4189eb0f", "revision is included in generated template");
   });
 
   QUnit.test("the template revision is different than the HTMLBars default revision", function () {
