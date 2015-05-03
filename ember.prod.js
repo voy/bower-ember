@@ -5,7 +5,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   1.13.0-beta.1+canary.d1da8403
+ * @version   1.13.0-beta.1+canary.86ecba9d
  */
 
 (function() {
@@ -7650,7 +7650,7 @@ enifed('ember-htmlbars/keywords/real_outlet', ['exports', 'ember-metal/property_
   @submodule ember-htmlbars
   */
 
-  topLevelViewTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.d1da8403";
+  topLevelViewTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.86ecba9d";
 
   exports['default'] = {
     willRender: function (renderNode, env) {
@@ -8404,7 +8404,7 @@ enifed('ember-htmlbars/system/bootstrap', ['exports', 'ember-metal/core', 'ember
   exports['default'] = bootstrap;
 
 });
-enifed('ember-htmlbars/system/component-node', ['exports', 'ember-metal/merge', 'ember-metal/core', 'ember-views/system/build-component-template', 'ember-metal/property_get', 'ember-metal/property_set', 'ember-metal/set_properties', 'ember-views/views/view', 'ember-views/compat/attrs-proxy', 'ember-htmlbars/hooks/get-cell-or-value', 'ember-htmlbars/hooks/get-value'], function (exports, merge, Ember, buildComponentTemplate, property_get, property_set, setProperties, View, attrs_proxy, getCellOrValue, getValue) {
+enifed('ember-htmlbars/system/component-node', ['exports', 'ember-metal/merge', 'ember-metal/core', 'ember-views/system/build-component-template', 'ember-metal/property_get', 'ember-metal/property_set', 'ember-metal/set_properties', 'ember-views/views/view', 'ember-views/compat/attrs-proxy', 'ember-htmlbars/hooks/get-cell-or-value', 'htmlbars-util/safe-string', 'ember-htmlbars/hooks/get-value'], function (exports, merge, Ember, buildComponentTemplate, property_get, property_set, setProperties, View, attrs_proxy, getCellOrValue, SafeString, getValue) {
 
   'use strict';
 
@@ -8500,6 +8500,20 @@ enifed('ember-htmlbars/system/component-node', ['exports', 'ember-metal/merge', 
 
     if (component) {
       var element = this.expectElement && this.renderNode.firstNode;
+      if (component.render) {
+        var content, node, lastChildIndex;
+        var buffer = [];
+        component.render(buffer);
+        content = buffer.join("");
+        if (element) {
+          lastChildIndex = this.renderNode.childNodes.length - 1;
+          node = this.renderNode.childNodes[lastChildIndex];
+        } else {
+          node = this.renderNode;
+        }
+        node.setContent(new SafeString['default'](content));
+      }
+
       env.renderer.didCreateElement(component, element); // 2.0TODO: Remove legacy hooks.
       env.renderer.willInsertElement(component, element);
       env.lifecycleHooks.push({ type: "didInsertElement", view: component });
@@ -8838,30 +8852,14 @@ enifed('ember-htmlbars/system/make_bound_helper', ['exports', 'ember-htmlbars/sy
   }
 
 });
-enifed('ember-htmlbars/system/render-view', ['exports', 'ember-metal/core', 'ember-htmlbars/env', 'ember-metal/property_get', 'ember-htmlbars/system/component-node'], function (exports, Ember, defaultEnv, property_get, component_node) {
+enifed('ember-htmlbars/system/render-view', ['exports', 'ember-htmlbars/env', 'ember-htmlbars/system/component-node'], function (exports, defaultEnv, component_node) {
 
   'use strict';
 
   exports.renderHTMLBarsBlock = renderHTMLBarsBlock;
 
-  exports['default'] = renderView;
-
   // This function only gets called once per render of a "root view" (`appendTo`). Otherwise,
   // HTMLBars propagates the existing env and renders templates for a given render node.
-  function renderView(view, buffer, template) {
-    if (!template) {
-      return;
-    }
-
-    var output;
-
-        output = renderLegacyTemplate(view, buffer, template);
-
-    if (output !== undefined) {
-      buffer.push(output);
-    }
-  }
-
   function renderHTMLBarsBlock(view, block, renderNode) {
     var env = {
       lifecycleHooks: [],
@@ -8878,24 +8876,9 @@ enifed('ember-htmlbars/system/render-view', ['exports', 'ember-metal/core', 'emb
 
     view.env = env;
     component_node.createOrUpdateComponent(view, {}, renderNode, env);
-    var componentNode = new component_node['default'](view, null, renderNode, block, true);
+    var componentNode = new component_node['default'](view, null, renderNode, block, view.tagName !== "");
 
     componentNode.render(env, {});
-  }
-
-  function renderLegacyTemplate(view, buffer, template) {
-    // FIXME: This should likely be removed. Adds support for bespoke kind-of-handlebars
-    // templates. They are used in tests, but nobody should be using them in the
-    // wild.
-    var context = property_get.get(view, "context");
-    var options = {
-      data: {
-        view: view,
-        buffer: buffer
-      }
-    };
-
-    return template(context, options);
   }
 
 });
@@ -8944,7 +8927,7 @@ enifed('ember-htmlbars/templates/component', ['exports', 'ember-template-compile
   exports['default'] = template['default']((function () {
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -8976,7 +8959,7 @@ enifed('ember-htmlbars/templates/container-view', ['exports', 'ember-template-co
     var child0 = (function () {
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 1,
         cachedFragment: null,
         hasRendered: false,
@@ -9002,7 +8985,7 @@ enifed('ember-htmlbars/templates/container-view', ['exports', 'ember-template-co
       var child0 = (function () {
         return {
           isHTMLBars: true,
-          revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+          revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
           arity: 0,
           cachedFragment: null,
           hasRendered: false,
@@ -9026,7 +9009,7 @@ enifed('ember-htmlbars/templates/container-view', ['exports', 'ember-template-co
       })();
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 0,
         cachedFragment: null,
         hasRendered: false,
@@ -9050,7 +9033,7 @@ enifed('ember-htmlbars/templates/container-view', ['exports', 'ember-template-co
     })();
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9081,7 +9064,7 @@ enifed('ember-htmlbars/templates/empty', ['exports', 'ember-template-compiler/sy
   exports['default'] = template['default']((function () {
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9109,7 +9092,7 @@ enifed('ember-htmlbars/templates/legacy-each', ['exports', 'ember-template-compi
         var child0 = (function () {
           return {
             isHTMLBars: true,
-            revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+            revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
             arity: 0,
             cachedFragment: null,
             hasRendered: false,
@@ -9133,7 +9116,7 @@ enifed('ember-htmlbars/templates/legacy-each', ['exports', 'ember-template-compi
         })();
         return {
           isHTMLBars: true,
-          revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+          revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
           arity: 0,
           cachedFragment: null,
           hasRendered: false,
@@ -9158,7 +9141,7 @@ enifed('ember-htmlbars/templates/legacy-each', ['exports', 'ember-template-compi
       var child1 = (function () {
         return {
           isHTMLBars: true,
-          revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+          revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
           arity: 0,
           cachedFragment: null,
           hasRendered: false,
@@ -9182,7 +9165,7 @@ enifed('ember-htmlbars/templates/legacy-each', ['exports', 'ember-template-compi
       })();
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 1,
         cachedFragment: null,
         hasRendered: false,
@@ -9208,7 +9191,7 @@ enifed('ember-htmlbars/templates/legacy-each', ['exports', 'ember-template-compi
       var child0 = (function () {
         return {
           isHTMLBars: true,
-          revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+          revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
           arity: 0,
           cachedFragment: null,
           hasRendered: false,
@@ -9232,7 +9215,7 @@ enifed('ember-htmlbars/templates/legacy-each', ['exports', 'ember-template-compi
       })();
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 0,
         cachedFragment: null,
         hasRendered: false,
@@ -9256,7 +9239,7 @@ enifed('ember-htmlbars/templates/legacy-each', ['exports', 'ember-template-compi
     })();
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9287,7 +9270,7 @@ enifed('ember-htmlbars/templates/link-to-escaped', ['exports', 'ember-template-c
   exports['default'] = template['default']((function () {
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9318,7 +9301,7 @@ enifed('ember-htmlbars/templates/link-to-unescaped', ['exports', 'ember-template
   exports['default'] = template['default']((function () {
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9351,7 +9334,7 @@ enifed('ember-htmlbars/templates/link-to', ['exports', 'ember-template-compiler/
       var child0 = (function () {
         return {
           isHTMLBars: true,
-          revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+          revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
           arity: 0,
           cachedFragment: null,
           hasRendered: false,
@@ -9376,7 +9359,7 @@ enifed('ember-htmlbars/templates/link-to', ['exports', 'ember-template-compiler/
       var child1 = (function () {
         return {
           isHTMLBars: true,
-          revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+          revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
           arity: 0,
           cachedFragment: null,
           hasRendered: false,
@@ -9400,7 +9383,7 @@ enifed('ember-htmlbars/templates/link-to', ['exports', 'ember-template-compiler/
       })();
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 0,
         cachedFragment: null,
         hasRendered: false,
@@ -9425,7 +9408,7 @@ enifed('ember-htmlbars/templates/link-to', ['exports', 'ember-template-compiler/
     var child1 = (function () {
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 0,
         cachedFragment: null,
         hasRendered: false,
@@ -9449,7 +9432,7 @@ enifed('ember-htmlbars/templates/link-to', ['exports', 'ember-template-compiler/
     })();
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9481,7 +9464,7 @@ enifed('ember-htmlbars/templates/select-optgroup', ['exports', 'ember-template-c
     var child0 = (function () {
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 1,
         cachedFragment: null,
         hasRendered: false,
@@ -9505,7 +9488,7 @@ enifed('ember-htmlbars/templates/select-optgroup', ['exports', 'ember-template-c
     })();
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9536,7 +9519,7 @@ enifed('ember-htmlbars/templates/select-option', ['exports', 'ember-template-com
   exports['default'] = template['default']((function () {
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9568,7 +9551,7 @@ enifed('ember-htmlbars/templates/select', ['exports', 'ember-template-compiler/s
     var child0 = (function () {
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 0,
         cachedFragment: null,
         hasRendered: false,
@@ -9595,7 +9578,7 @@ enifed('ember-htmlbars/templates/select', ['exports', 'ember-template-compiler/s
       var child0 = (function () {
         return {
           isHTMLBars: true,
-          revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+          revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
           arity: 1,
           cachedFragment: null,
           hasRendered: false,
@@ -9619,7 +9602,7 @@ enifed('ember-htmlbars/templates/select', ['exports', 'ember-template-compiler/s
       })();
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 0,
         cachedFragment: null,
         hasRendered: false,
@@ -9645,7 +9628,7 @@ enifed('ember-htmlbars/templates/select', ['exports', 'ember-template-compiler/s
       var child0 = (function () {
         return {
           isHTMLBars: true,
-          revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+          revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
           arity: 1,
           cachedFragment: null,
           hasRendered: false,
@@ -9669,7 +9652,7 @@ enifed('ember-htmlbars/templates/select', ['exports', 'ember-template-compiler/s
       })();
       return {
         isHTMLBars: true,
-        revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+        revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
         arity: 0,
         cachedFragment: null,
         hasRendered: false,
@@ -9693,7 +9676,7 @@ enifed('ember-htmlbars/templates/select', ['exports', 'ember-template-compiler/s
     })();
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -9728,7 +9711,7 @@ enifed('ember-htmlbars/templates/top-level-view', ['exports', 'ember-template-co
   exports['default'] = template['default']((function () {
     return {
       isHTMLBars: true,
-      revision: "Ember@1.13.0-beta.1+canary.d1da8403",
+      revision: "Ember@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
@@ -12407,7 +12390,7 @@ enifed('ember-metal/core', ['exports'], function (exports) {
 
     @class Ember
     @static
-    @version 1.13.0-beta.1+canary.d1da8403
+    @version 1.13.0-beta.1+canary.86ecba9d
   */
 
   if ('undefined' === typeof Ember) {
@@ -12436,10 +12419,10 @@ enifed('ember-metal/core', ['exports'], function (exports) {
   /**
     @property VERSION
     @type String
-    @default '1.13.0-beta.1+canary.d1da8403'
+    @default '1.13.0-beta.1+canary.86ecba9d'
     @static
   */
-  Ember.VERSION = '1.13.0-beta.1+canary.d1da8403';
+  Ember.VERSION = '1.13.0-beta.1+canary.86ecba9d';
 
   /**
     Standard environmental variables. You can define these in a global `EmberENV`
@@ -19374,7 +19357,7 @@ enifed('ember-routing-htmlbars/helpers/link-to', ['exports', 'ember-metal/core',
   @submodule ember-routing-htmlbars
   */
 
-  linkToTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.d1da8403"; /**
+  linkToTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.86ecba9d"; /**
                                                                   The `{{link-to}}` helper renders a link to the supplied
                                                                   `routeName` passing an optionally supplied model to the
                                                                   route as its `model` context of the route. The block
@@ -20119,7 +20102,7 @@ enifed('ember-routing-views/views/link', ['exports', 'ember-metal/core', 'ember-
   @submodule ember-routing-views
   */
 
-  linkToTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.d1da8403";
+  linkToTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.86ecba9d";
 
   var linkViewClassNameBindings = ["active", "loading", "disabled"];
   
@@ -20589,7 +20572,7 @@ enifed('ember-routing-views/views/outlet', ['exports', 'ember-views/views/view',
   @submodule ember-routing-views
   */
 
-  topLevelViewTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.d1da8403";
+  topLevelViewTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.86ecba9d";
 
   var CoreOutletView = View['default'].extend({
     defaultTemplate: topLevelViewTemplate['default'],
@@ -35184,7 +35167,7 @@ enifed('ember-template-compiler/system/compile_options', ['exports', 'ember-meta
       options = {};
     }
 
-    options.revision = "Ember@1.13.0-beta.1+canary.d1da8403";
+    options.revision = "Ember@1.13.0-beta.1+canary.86ecba9d";
     options.disableComponentGeneration = disableComponentGeneration;
     options.plugins = plugins['default'];
 
@@ -35416,6 +35399,551 @@ enifed('ember-views/compat/attrs-proxy', ['exports', 'ember-metal/property_get',
   exports['default'] = mixin.Mixin.create(AttrsProxyMixin);
 
   exports.MUTABLE_CELL = MUTABLE_CELL;
+
+});
+enifed('ember-views/compat/render_buffer', ['exports', 'ember-views/system/jquery', 'ember-metal/core', 'ember-metal/platform/create', 'dom-helper/prop', 'ember-views/system/platform'], function (exports, jQuery, Ember, o_create, dom_helper__prop, platform) {
+
+  'use strict';
+
+  exports.renderComponentWithBuffer = renderComponentWithBuffer;
+
+  var omittedStartTagChildren;
+  var omittedStartTagChildTest = /(?:<script)*.*?<([\w:]+)/i;
+
+  function detectOmittedStartTag(dom, string, contextualElement) {
+    omittedStartTagChildren = omittedStartTagChildren || {
+      tr: dom.createElement("tbody"),
+      col: dom.createElement("colgroup")
+    };
+
+    // Omitted start tags are only inside table tags.
+    if (contextualElement.tagName === "TABLE") {
+      var omittedStartTagChildMatch = omittedStartTagChildTest.exec(string);
+      if (omittedStartTagChildMatch) {
+        // It is already asserted that the contextual element is a table
+        // and not the proper start tag. Just look up the start tag.
+        return omittedStartTagChildren[omittedStartTagChildMatch[1].toLowerCase()];
+      }
+    }
+  }
+
+  function ClassSet() {
+    this.seen = o_create['default'](null);
+    this.list = [];
+  }
+
+  ClassSet.prototype = {
+    add: function (string) {
+      if (this.seen[string] === true) {
+        return;
+      }
+      this.seen[string] = true;
+
+      this.list.push(string);
+    }
+  };
+
+  var BAD_TAG_NAME_TEST_REGEXP = /[^a-zA-Z0-9\-]/;
+  var BAD_TAG_NAME_REPLACE_REGEXP = /[^a-zA-Z0-9\-]/g;
+
+  function stripTagName(tagName) {
+    if (!tagName) {
+      return tagName;
+    }
+
+    if (!BAD_TAG_NAME_TEST_REGEXP.test(tagName)) {
+      return tagName;
+    }
+
+    return tagName.replace(BAD_TAG_NAME_REPLACE_REGEXP, "");
+  }
+
+  var BAD_CHARS_REGEXP = /&(?!\w+;)|[<>"'`]/g;
+  var POSSIBLE_CHARS_REGEXP = /[&<>"'`]/;
+
+  function escapeAttribute(value) {
+    // Stolen shamelessly from Handlebars
+
+    var escape = {
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#x27;",
+      "`": "&#x60;"
+    };
+
+    var escapeChar = function (chr) {
+      return escape[chr] || "&amp;";
+    };
+
+    var string = value.toString();
+
+    if (!POSSIBLE_CHARS_REGEXP.test(string)) {
+      return string;
+    }
+    return string.replace(BAD_CHARS_REGEXP, escapeChar);
+  }
+  function renderComponentWithBuffer(component, contextualElement, dom) {
+    var buffer = [];
+    component.render(buffer);
+    var element = dom.parseHTML(buffer.join(""), contextualElement);
+    return element;
+  }
+
+  /**
+    `Ember.RenderBuffer` gathers information regarding the view and generates the
+    final representation. `Ember.RenderBuffer` will generate HTML which can be pushed
+    to the DOM.
+
+     ```javascript
+     var buffer = new Ember.RenderBuffer('div', contextualElement);
+    ```
+
+    @method renderBuffer
+    @namespace Ember
+    @param {String} tagName tag name (such as 'div' or 'p') used for the buffer
+  */
+
+  var RenderBuffer = function (domHelper) {
+    this.buffer = null;
+    this.childViews = [];
+    this.attrNodes = [];
+
+    
+    this.dom = domHelper;
+  };
+
+  RenderBuffer.prototype = {
+
+    reset: function (tagName, contextualElement) {
+      this.tagName = tagName;
+      this.buffer = null;
+      this._element = null;
+      this._outerContextualElement = contextualElement;
+      this.elementClasses = null;
+      this.elementId = null;
+      this.elementAttributes = null;
+      this.elementProperties = null;
+      this.elementTag = null;
+      this.elementStyle = null;
+      this.childViews.length = 0;
+      this.attrNodes.length = 0;
+    },
+
+    // The root view's element
+    _element: null,
+
+    // The root view's contextualElement
+    _outerContextualElement: null,
+
+    /**
+      An internal set used to de-dupe class names when `addClass()` is
+      used. After each call to `addClass()`, the `classes` property
+      will be updated.
+       @private
+      @property elementClasses
+      @type Array
+      @default null
+    */
+    elementClasses: null,
+
+    /**
+      Array of class names which will be applied in the class attribute.
+       You can use `setClasses()` to set this property directly. If you
+      use `addClass()`, it will be maintained for you.
+       @property classes
+      @type Array
+      @default null
+    */
+    classes: null,
+
+    /**
+      The id in of the element, to be applied in the id attribute.
+       You should not set this property yourself, rather, you should use
+      the `id()` method of `Ember.RenderBuffer`.
+       @property elementId
+      @type String
+      @default null
+    */
+    elementId: null,
+
+    /**
+      A hash keyed on the name of the attribute and whose value will be
+      applied to that attribute. For example, if you wanted to apply a
+      `data-view="Foo.bar"` property to an element, you would set the
+      elementAttributes hash to `{'data-view':'Foo.bar'}`.
+       You should not maintain this hash yourself, rather, you should use
+      the `attr()` method of `Ember.RenderBuffer`.
+       @property elementAttributes
+      @type Hash
+      @default {}
+    */
+    elementAttributes: null,
+
+    /**
+      A hash keyed on the name of the properties and whose value will be
+      applied to that property. For example, if you wanted to apply a
+      `checked=true` property to an element, you would set the
+      elementProperties hash to `{'checked':true}`.
+       You should not maintain this hash yourself, rather, you should use
+      the `prop()` method of `Ember.RenderBuffer`.
+       @property elementProperties
+      @type Hash
+      @default {}
+    */
+    elementProperties: null,
+
+    /**
+      The tagname of the element an instance of `Ember.RenderBuffer` represents.
+       Usually, this gets set as the first parameter to `Ember.RenderBuffer`. For
+      example, if you wanted to create a `p` tag, then you would call
+       ```javascript
+      Ember.RenderBuffer('p', contextualElement)
+      ```
+       @property elementTag
+      @type String
+      @default null
+    */
+    elementTag: null,
+
+    /**
+      A hash keyed on the name of the style attribute and whose value will
+      be applied to that attribute. For example, if you wanted to apply a
+      `background-color:black;` style to an element, you would set the
+      elementStyle hash to `{'background-color':'black'}`.
+       You should not maintain this hash yourself, rather, you should use
+      the `style()` method of `Ember.RenderBuffer`.
+       @property elementStyle
+      @type Hash
+      @default {}
+    */
+    elementStyle: null,
+
+    pushChildView: function (view) {
+      var index = this.childViews.length;
+      this.childViews[index] = view;
+      this.push("<script id='morph-" + index + "' type='text/x-placeholder'></script>");
+    },
+
+    pushAttrNode: function (node) {
+      var index = this.attrNodes.length;
+      this.attrNodes[index] = node;
+    },
+
+    hydrateMorphs: function (contextualElement) {
+      var childViews = this.childViews;
+      var el = this._element;
+      for (var i = 0, l = childViews.length; i < l; i++) {
+        var childView = childViews[i];
+        var ref = el.querySelector("#morph-" + i);
+
+        
+        var parent = ref.parentNode;
+
+        childView._morph = this.dom.insertMorphBefore(parent, ref, parent.nodeType === 1 ? parent : contextualElement);
+        parent.removeChild(ref);
+      }
+    },
+
+    /**
+      Adds a string of HTML to the `RenderBuffer`.
+       @method push
+      @param {String} string HTML to push into the buffer
+      @chainable
+    */
+    push: function (content) {
+      if (typeof content === "string") {
+        if (this.buffer === null) {
+          this.buffer = "";
+        }
+                this.buffer += content;
+      } else {
+                this.buffer = content;
+      }
+      return this;
+    },
+
+    /**
+      Adds a class to the buffer, which will be rendered to the class attribute.
+       @method addClass
+      @param {String} className Class name to add to the buffer
+      @chainable
+    */
+    addClass: function (className) {
+      // lazily create elementClasses
+      this.elementClasses = this.elementClasses || new ClassSet();
+      this.elementClasses.add(className);
+      this.classes = this.elementClasses.list;
+
+      return this;
+    },
+
+    setClasses: function (classNames) {
+      this.elementClasses = null;
+      var len = classNames.length;
+      var i;
+      for (i = 0; i < len; i++) {
+        this.addClass(classNames[i]);
+      }
+    },
+
+    /**
+      Sets the elementID to be used for the element.
+       @method id
+      @param {String} id
+      @chainable
+    */
+    id: function (id) {
+      this.elementId = id;
+      return this;
+    },
+
+    // duck type attribute functionality like jQuery so a render buffer
+    // can be used like a jQuery object in attribute binding scenarios.
+
+    /**
+      Adds an attribute which will be rendered to the element.
+       @method attr
+      @param {String} name The name of the attribute
+      @param {String} value The value to add to the attribute
+      @chainable
+      @return {Ember.RenderBuffer|String} this or the current attribute value
+    */
+    attr: function (name, value) {
+      var attributes = this.elementAttributes = this.elementAttributes || {};
+
+      if (arguments.length === 1) {
+        return attributes[name];
+      } else {
+        attributes[name] = value;
+      }
+
+      return this;
+    },
+
+    /**
+      Remove an attribute from the list of attributes to render.
+       @method removeAttr
+      @param {String} name The name of the attribute
+      @chainable
+    */
+    removeAttr: function (name) {
+      var attributes = this.elementAttributes;
+      if (attributes) {
+        delete attributes[name];
+      }
+
+      return this;
+    },
+
+    /**
+      Adds a property which will be rendered to the element.
+       @method prop
+      @param {String} name The name of the property
+      @param {String} value The value to add to the property
+      @chainable
+      @return {Ember.RenderBuffer|String} this or the current property value
+    */
+    prop: function (name, value) {
+      var properties = this.elementProperties = this.elementProperties || {};
+
+      if (arguments.length === 1) {
+        return properties[name];
+      } else {
+        properties[name] = value;
+      }
+
+      return this;
+    },
+
+    /**
+      Remove an property from the list of properties to render.
+       @method removeProp
+      @param {String} name The name of the property
+      @chainable
+    */
+    removeProp: function (name) {
+      var properties = this.elementProperties;
+      if (properties) {
+        delete properties[name];
+      }
+
+      return this;
+    },
+
+    /**
+      Adds a style to the style attribute which will be rendered to the element.
+       @method style
+      @param {String} name Name of the style
+      @param {String} value
+      @chainable
+    */
+    style: function (name, value) {
+      this.elementStyle = this.elementStyle || {};
+
+      this.elementStyle[name] = value;
+      return this;
+    },
+
+    generateElement: function () {
+      var tagName = this.tagName;
+      var id = this.elementId;
+      var classes = this.classes;
+      var attrs = this.elementAttributes;
+      var props = this.elementProperties;
+      var style = this.elementStyle;
+      var styleBuffer = "";
+      var attr, prop, tagString;
+
+      if (!platform.canSetNameOnInputs && attrs && attrs.name) {
+        // IE allows passing a tag to createElement. See note on `canSetNameOnInputs` above as well.
+        tagString = "<" + stripTagName(tagName) + " name=\"" + escapeAttribute(attrs.name) + "\">";
+      } else {
+        tagString = tagName;
+      }
+
+      var element = this.dom.createElement(tagString, this.outerContextualElement());
+
+      if (id) {
+        this.dom.setAttribute(element, "id", id);
+        this.elementId = null;
+      }
+      if (classes) {
+        this.dom.setAttribute(element, "class", classes.join(" "));
+        this.classes = null;
+        this.elementClasses = null;
+      }
+
+      if (style) {
+        for (prop in style) {
+          styleBuffer += prop + ":" + style[prop] + ";";
+        }
+
+        this.dom.setAttribute(element, "style", styleBuffer);
+
+        this.elementStyle = null;
+      }
+
+      if (attrs) {
+        for (attr in attrs) {
+          this.dom.setAttribute(element, attr, attrs[attr]);
+        }
+
+        this.elementAttributes = null;
+      }
+
+      if (props) {
+        for (prop in props) {
+          var normalizedCase = dom_helper__prop.normalizeProperty(element, prop.toLowerCase()) || prop;
+
+          this.dom.setPropertyStrict(element, normalizedCase, props[prop]);
+        }
+
+        this.elementProperties = null;
+      }
+
+      return this._element = element;
+    },
+
+    /**
+      @method element
+      @return {DOMElement} The element corresponding to the generated HTML
+        of this buffer
+    */
+    element: function () {
+
+      if (this._element && this.attrNodes.length > 0) {
+        var i, l, attrMorph, attrNode;
+        for (i = 0, l = this.attrNodes.length; i < l; i++) {
+          attrNode = this.attrNodes[i];
+          attrMorph = this.dom.createAttrMorph(this._element, attrNode.attrName);
+          attrNode._morph = attrMorph;
+        }
+      }
+
+      var content = this.innerContent();
+      // No content means a text node buffer, with the content
+      // in _element. Ember._BoundView is an example.
+      if (content === null) {
+        return this._element;
+      }
+
+      var contextualElement = this.innerContextualElement(content);
+      this.dom.detectNamespace(contextualElement);
+
+      if (!this._element) {
+        this._element = this.dom.createDocumentFragment();
+      }
+
+      if (content.nodeType) {
+        this._element.appendChild(content);
+      } else {
+        var frag = this.dom.parseHTML(content, contextualElement);
+        this._element.appendChild(frag);
+      }
+
+      // This should only happen with legacy string buffers
+      if (this.childViews.length > 0) {
+        this.hydrateMorphs(contextualElement);
+      }
+
+      return this._element;
+    },
+
+    /**
+      Generates the HTML content for this buffer.
+       @method string
+      @return {String} The generated HTML
+    */
+    string: function () {
+      if (this._element) {
+        // Firefox versions < 11 do not have support for element.outerHTML.
+        var thisElement = this.element();
+        var outerHTML = thisElement.outerHTML;
+        if (typeof outerHTML === "undefined") {
+          return jQuery['default']("<div/>").append(thisElement).html();
+        }
+        return outerHTML;
+      } else {
+        return this.innerString();
+      }
+    },
+
+    outerContextualElement: function () {
+      if (this._outerContextualElement === undefined) {
+                this.outerContextualElement = document.body;
+      }
+      return this._outerContextualElement;
+    },
+
+    innerContextualElement: function (html) {
+      var innerContextualElement;
+      if (this._element && this._element.nodeType === 1) {
+        innerContextualElement = this._element;
+      } else {
+        innerContextualElement = this.outerContextualElement();
+      }
+
+      var omittedStartTag;
+      if (html) {
+        omittedStartTag = detectOmittedStartTag(this.dom, html, innerContextualElement);
+      }
+      return omittedStartTag || innerContextualElement;
+    },
+
+    innerString: function () {
+      var content = this.innerContent();
+      if (content && !content.nodeType) {
+        return content;
+      }
+    },
+
+    innerContent: function () {
+      return this.buffer;
+    }
+  };
+
+  exports['default'] = RenderBuffer;
 
 });
 enifed('ember-views/component_lookup', ['exports', 'ember-runtime/system/object'], function (exports, EmberObject) {
@@ -35790,7 +36318,6 @@ enifed('ember-views/mixins/template_rendering_support', ['exports', 'ember-metal
        @method render
       @param {Ember.RenderBuffer} buffer The render buffer
     */
-    render: function (buffer) {},
 
     renderBlock: function (block, renderNode) {
       if (_renderView === undefined) {
@@ -35802,8 +36329,6 @@ enifed('ember-views/mixins/template_rendering_support', ['exports', 'ember-metal
   });
 
   exports['default'] = TemplateRenderingSupport;
-
-  // TODO: Legacy string render function support
 
 });
 enifed('ember-views/mixins/text_support', ['exports', 'ember-metal/property_get', 'ember-metal/property_set', 'ember-metal/mixin', 'ember-runtime/mixins/target_action_support'], function (exports, property_get, property_set, mixin, TargetActionSupport) {
@@ -38391,7 +38916,7 @@ enifed('ember-views/views/container_view', ['exports', 'ember-metal/core', 'embe
 
   'use strict';
 
-  containerViewTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.d1da8403";
+  containerViewTemplate['default'].revision = "Ember@1.13.0-beta.1+canary.86ecba9d";
 
   /**
   @module ember
@@ -42459,7 +42984,7 @@ enifed('htmlbars-runtime/render', ['exports', '../htmlbars-util/array-utils', '.
 
     var template = {
       isHTMLBars: true,
-      revision: "HTMLBars@1.13.0-beta.1+canary.d1da8403",
+      revision: "HTMLBars@1.13.0-beta.1+canary.86ecba9d",
       arity: 0,
       cachedFragment: null,
       hasRendered: false,
