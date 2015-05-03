@@ -5,7 +5,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   1.13.0-beta.1+canary.86ecba9d
+ * @version   1.13.0-beta.1+canary.5a33e9c0
  */
 
 (function() {
@@ -44498,7 +44498,7 @@ enifed('ember-template-compiler/tests/system/compile_test', ['ember-template-com
 
     var actual = compile['default'](templateString);
 
-    equal(actual.revision, "Ember@1.13.0-beta.1+canary.86ecba9d", "revision is included in generated template");
+    equal(actual.revision, "Ember@1.13.0-beta.1+canary.5a33e9c0", "revision is included in generated template");
   });
 
   QUnit.test("the template revision is different than the HTMLBars default revision", function () {
@@ -56120,7 +56120,7 @@ enifed('ember/tests/helpers/link_to_test', ['ember', 'ember-runtime/controllers/
     equal(Ember.$("#contact-link:contains(Robert)", "#qunit-fixture").length, 1, "The link title is correctly updated when the route changes");
   });
 
-  QUnit.skip("The non-block form {{link-to}} helper moves into the named route with context", function () {
+  QUnit.test("The non-block form {{link-to}} helper moves into the named route with context", function () {
     expect(5);
     Router.map(function (match) {
       this.route("item", { path: "/item/:id" });
@@ -59629,7 +59629,7 @@ enifed('ember/tests/template_scope_test', ['ember', 'ember-htmlbars/compat'], fu
     }
   });
 
-  QUnit.skip("Actions inside an outlet go to the associated controller", function () {
+  QUnit.test("Actions inside an outlet go to the associated controller", function () {
     expect(1);
 
     templates.index = compile("{{component-with-action action='componentAction'}}");
