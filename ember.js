@@ -839,7 +839,7 @@ enifed("backburner/queue",
       targetQueue: function(targetQueue, target, method, args, stack) {
         var queue = this._queue;
 
-        for (var i = 0, l = targetQueue.length; i < l; i += 4) {
+        for (var i = 0, l = targetQueue.length; i < l; i += 2) {
           var currentMethod = targetQueue[i];
           var currentIndex  = targetQueue[i + 1];
 
