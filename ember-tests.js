@@ -5,7 +5,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   1.13.0-beta.1+canary.6795e0be
+ * @version   1.13.0-beta.1+canary.5d38b798
  */
 
 (function() {
@@ -44498,7 +44498,7 @@ enifed('ember-template-compiler/tests/system/compile_test', ['ember-template-com
 
     var actual = compile['default'](templateString);
 
-    equal(actual.revision, "Ember@1.13.0-beta.1+canary.6795e0be", "revision is included in generated template");
+    equal(actual.revision, "Ember@1.13.0-beta.1+canary.5d38b798", "revision is included in generated template");
   });
 
   QUnit.test("the template revision is different than the HTMLBars default revision", function () {
@@ -54433,6 +54433,25 @@ enifed('ember-views/tests/views/view_test', ['ember-metal/computed', 'ember-meta
     ok(view.$("tr").length, "inner view is tr");
   });
 
+  QUnit.test("propagates dependent-key invalidated sets upstream", function () {
+    view = EmberView['default'].create({
+      parentProp: "parent-value",
+      template: ember_template_compiler.compile("{{view view.childView childProp=view.parentProp}}"),
+      childView: EmberView['default'].createWithMixins({
+        template: ember_template_compiler.compile("child template"),
+        childProp: "old-value"
+      })
+    });
+
+    run['default'](view, view.append);
+
+    equal(view.get("parentProp"), "parent-value", "precond - parent value is there");
+    var childView = view.get("childView");
+    debugger;
+    childView.set("childProp", "new-value");
+    equal(view.get("parentProp"), "new-value", "new value is propagated across template");
+  });
+
   QUnit.skip("propagates dependent-key invalidated bindings upstream", function () {
     view = EmberView['default'].create({
       parentProp: "parent-value",
@@ -54444,6 +54463,7 @@ enifed('ember-views/tests/views/view_test', ['ember-metal/computed', 'ember-meta
             return this.get("dependencyProp");
           },
           set: function (key, value) {
+            // Avoid getting stomped by the template attrs
             return this.get("dependencyProp");
           }
         }),
