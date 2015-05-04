@@ -5,7 +5,7 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   1.13.0-beta.1+canary.42b5df02
+ * @version   1.13.0-beta.1+canary.4cfb2bdb
  */
 
 (function() {
@@ -44344,7 +44344,7 @@ enifed('ember-template-compiler/tests/system/compile_test', ['ember-template-com
 
     var actual = compile['default'](templateString);
 
-    equal(actual.revision, "Ember@1.13.0-beta.1+canary.42b5df02", "revision is included in generated template");
+    equal(actual.revision, "Ember@1.13.0-beta.1+canary.4cfb2bdb", "revision is included in generated template");
   });
 
   QUnit.test("the template revision is different than the HTMLBars default revision", function () {
@@ -54778,6 +54778,113 @@ enifed('ember/tests/component_registration_test', ['ember', 'ember-template-comp
   });
 
 });
+enifed('ember/tests/controller_test', ['ember', 'ember-htmlbars/compat'], function (__dep0__, EmberHandlebars) {
+
+  'use strict';
+
+  var compile = EmberHandlebars['default'].compile;
+  var App, $fixture, templates;
+
+  QUnit.module("Template scoping examples", {
+    setup: function () {
+      Ember.run(function () {
+        templates = Ember.TEMPLATES;
+        App = Ember.Application.create({
+          name: "App",
+          rootElement: "#qunit-fixture"
+        });
+        App.deferReadiness();
+
+        App.Router.reopen({
+          location: "none"
+        });
+
+        App.LoadingRoute = Ember.Route.extend();
+      });
+
+      $fixture = Ember.$("#qunit-fixture");
+    },
+
+    teardown: function () {
+      Ember.run(function () {
+        App.destroy();
+      });
+
+      App = null;
+
+      Ember.TEMPLATES = {};
+    }
+  });
+
+  QUnit.test("Actions inside an outlet go to the associated controller", function () {
+    expect(1);
+
+    templates.index = compile("{{component-with-action action='componentAction'}}");
+
+    App.IndexController = Ember.Controller.extend({
+      actions: {
+        componentAction: function () {
+          ok(true, "received the click");
+        }
+      }
+    });
+
+    App.ComponentWithActionComponent = Ember.Component.extend({
+      classNames: ["component-with-action"],
+      click: function () {
+        this.sendAction();
+      }
+    });
+
+    bootApp();
+
+    $fixture.find(".component-with-action").click();
+  });
+
+  // This test caught a regression where {{#each}}s used directly in a template
+  // (i.e., not inside a view or component) did not have access to a container and
+  // would raise an exception.
+  QUnit.test("{{#each}} inside outlet can have an itemController", function (assert) {
+    templates.index = compile("\n    {{#each model itemController='thing'}}\n      <p>hi</p>\n    {{/each}}\n  ");
+
+    App.IndexController = Ember.Controller.extend({
+      model: Ember.A([1, 2, 3])
+    });
+
+    App.ThingController = Ember.Controller.extend();
+
+    bootApp();
+
+    assert.equal($fixture.find("p").length, 3, "the {{#each}} rendered without raising an exception");
+  });
+
+  QUnit.test("", function (assert) {
+    templates.index = compile("\n    {{#each model itemController='thing'}}\n      {{controller}}\n      <p><a {{action 'checkController' controller}}>Click me</a></p>\n    {{/each}}\n  ");
+
+    App.IndexRoute = Ember.Route.extend({
+      model: function () {
+        return Ember.A([{ name: "red" }, { name: "yellow" }, { name: "blue" }]);
+      }
+    });
+
+    App.ThingController = Ember.Controller.extend({
+      actions: {
+        checkController: function (controller) {
+          assert.ok(controller === this, "correct controller was passed as action context");
+        }
+      }
+    });
+
+    bootApp();
+
+    $fixture.find("a").first().click();
+  });
+
+  function bootApp() {
+    Ember.run(App, "advanceReadiness");
+  }
+
+});
 enifed('ember/tests/default_initializers_test', ['ember-application/system/application', 'ember-views/views/text_field', 'ember-views/views/checkbox', 'ember-metal/run_loop'], function (Application, TextField, Checkbox, run) {
 
   'use strict';
@@ -59462,74 +59569,6 @@ enifed('ember/tests/routing/toplevel_dom_test', ['ember', 'ember-htmlbars/compat
     bootApplication();
     equal(Ember.$("#qunit-fixture > .im-special").text(), "hello world");
   });
-
-});
-enifed('ember/tests/template_scope_test', ['ember', 'ember-htmlbars/compat'], function (__dep0__, EmberHandlebars) {
-
-  'use strict';
-
-  var compile = EmberHandlebars['default'].compile;
-  var App, $fixture, templates;
-
-  QUnit.module("Template scoping examples", {
-    setup: function () {
-      Ember.run(function () {
-        templates = Ember.TEMPLATES;
-        App = Ember.Application.create({
-          name: "App",
-          rootElement: "#qunit-fixture"
-        });
-        App.deferReadiness();
-
-        App.Router.reopen({
-          location: "none"
-        });
-
-        App.LoadingRoute = Ember.Route.extend();
-      });
-
-      $fixture = Ember.$("#qunit-fixture");
-    },
-
-    teardown: function () {
-      Ember.run(function () {
-        App.destroy();
-      });
-
-      App = null;
-
-      Ember.TEMPLATES = {};
-    }
-  });
-
-  QUnit.test("Actions inside an outlet go to the associated controller", function () {
-    expect(1);
-
-    templates.index = compile("{{component-with-action action='componentAction'}}");
-
-    App.IndexController = Ember.Controller.extend({
-      actions: {
-        componentAction: function () {
-          ok(true, "received the click");
-        }
-      }
-    });
-
-    App.ComponentWithActionComponent = Ember.Component.extend({
-      classNames: ["component-with-action"],
-      click: function () {
-        this.sendAction();
-      }
-    });
-
-    bootApp();
-
-    $fixture.find(".component-with-action").click();
-  });
-
-  function bootApp() {
-    Ember.run(App, "advanceReadiness");
-  }
 
 });
 })();
